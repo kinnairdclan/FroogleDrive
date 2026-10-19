@@ -1,0 +1,34 @@
+{% macro link(path, label) -%}
+<a href="{{ url_for('browse.browse', rel=path) }}" hx-get="{{ url_for('browse.browse', rel=path) }}"
+   hx-target="#listing" hx-push-url="true">{{ label }}</a>
+{%- endmacro %}
+<title>{{ rel or "/" }} · FroogleDrive</title>
+<div class="toolbar">
+  {% set root_label = "Root" %}
+  {% include "partials/_breadcrumbs.html" %}
+  <button class="primary" hx-get="{{ url_for('shares.new', path=rel) }}" hx-target="#share-dialog">Share this folder</button>
+</div>
+<table class="files">
+  <thead><tr><th>Name</th><th class="num">Size</th><th>Modified</th><th></th></tr></thead>
+  <tbody>
+  {% if parent is not none %}
+    <tr><td colspan="4">{{ link(parent, "↩ ..") }}</td></tr>
+  {% endif %}
+  {% for e in entries %}
+    <tr>
+      <td class="name">
+        <img class="icon" src="{{ file_icon(e.name, e.is_dir) }}" alt="" width="24" height="24">
+        {% if e.is_dir %}{{ link(e.rel, e.name) }}
+        {% else %}<a href="{{ url_for('browse.browse', rel=e.rel) }}">{{ e.name }}</a>{% endif %}
+      </td>
+      <td class="num">{{ "" if e.is_dir else e.size|filesize }}</td>
+      <td>{{ e.mtime|datetime }}</td>
+      <td class="actions">
+        <button hx-get="{{ url_for('shares.new', path=e.rel) }}" hx-target="#share-dialog">Share</button>
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="4" class="muted">This folder is empty.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>

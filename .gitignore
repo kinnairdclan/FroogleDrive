@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+
+# Secrets: any .env variant except the template
+.env
+.env.*
+!.env.example
+
+# Shared files and the share-link database (tokens grant access), incl. backups
+data/
+instance/
+*.db
+*.sqlite
+*.sqlite3

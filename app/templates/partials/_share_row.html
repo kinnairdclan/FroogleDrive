@@ -1,0 +1,28 @@
+<tr id="share-{{ share.token }}" class="status-{{ share.status }}">
+  <td class="name"><img class="icon" src="{{ file_icon(share.name, share.is_dir) }}" alt="" width="24" height="24">/{{ share.rel_path }}</td>
+  <td>{{ share.created_at|datetime }}</td>
+  <td>{{ share.expires_at|datetime if share.expires_at else "Never" }}</td>
+  <td><span class="badge {{ share.status }}">{{ share.status }}</span></td>
+  <td class="link-cell">
+    {% if share.status == "active" %}
+    <div class="copy-row">
+      <input type="text" readonly value="{{ share.url }}" id="link-{{ share.token }}" onfocus="this.select()">
+      <button class="copy-btn" data-copy="#link-{{ share.token }}"><span>Copy</span><span>Copied!</span></button>
+    </div>
+    {% else %}
+    {# Invisible stand-in so inactive rows are exactly as tall as active ones #}
+    <div class="copy-row placeholder" aria-hidden="true">
+      <input type="text" disabled tabindex="-1"><button class="copy-btn" disabled tabindex="-1"><span>Copy</span><span>Copied!</span></button>
+    </div>
+    {% endif %}
+  </td>
+  <td class="actions">
+    {% if not share.revoked %}
+    <button class="danger" hx-delete="{{ url_for('shares.revoke', token=share.token) }}"
+            hx-target="closest tr" hx-swap="outerHTML" hx-confirm="Revoke this link?">Revoke</button>
+    {% else %}
+    <button class="danger" hx-post="{{ url_for('shares.delete', token=share.token) }}"
+            hx-target="closest tr" hx-swap="outerHTML" hx-confirm="Delete this revoked link from the list?">Delete</button>
+    {% endif %}
+  </td>
+</tr>

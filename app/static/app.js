@@ -1,0 +1,32 @@
+// Open the share dialog whenever HTMX swaps content into it.
+document.addEventListener("htmx:afterSwap", (e) => {
+  const dialog = e.detail.target;
+  if (dialog.id === "share-dialog" && !dialog.open) dialog.showModal();
+});
+
+document.addEventListener("click", async (e) => {
+  const closer = e.target.closest("[data-close-dialog]");
+  if (closer) {
+    closer.closest("dialog")?.close();
+    return;
+  }
+  const btn = e.target.closest("[data-copy]");
+  if (!btn) return;
+  const input = document.querySelector(btn.dataset.copy);
+  try {
+    await navigator.clipboard.writeText(input.value);
+  } catch {
+    // Clipboard API needs HTTPS or localhost; fall back to a selection copy.
+    input.select();
+    document.execCommand("copy");
+  }
+  // The button holds both labels (see .copy-btn), so swapping never resizes it.
+  btn.classList.add("copied");
+  clearTimeout(btn.copiedTimer);
+  btn.copiedTimer = setTimeout(() => btn.classList.remove("copied"), 1500);
+});
+
+// Close the dialog when clicking the backdrop.
+document.addEventListener("click", (e) => {
+  if (e.target.id === "share-dialog") e.target.close();
+});

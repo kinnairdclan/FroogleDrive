@@ -1,0 +1,120 @@
+/* Adwaita Sans / Adwaita Mono: GNOME's UI fonts (SIL OFL, see fonts/LICENSE) */
+@font-face { font-family: "Adwaita Sans"; font-style: normal; font-weight: 100 900; font-display: swap;
+  src: local("Adwaita Sans"), url("fonts/AdwaitaSans-Regular.woff2") format("woff2"); }
+@font-face { font-family: "Adwaita Sans"; font-style: italic; font-weight: 100 900; font-display: swap;
+  src: local("Adwaita Sans Italic"), url("fonts/AdwaitaSans-Italic.woff2") format("woff2"); }
+@font-face { font-family: "Adwaita Mono"; font-style: normal; font-weight: 400; font-display: swap;
+  src: local("Adwaita Mono"), url("fonts/AdwaitaMono-Regular.woff2") format("woff2"); }
+
+/* libadwaita palette */
+:root {
+  --bg: #fafafb; --surface: #ffffff; --headerbar: #ffffff; --text: rgb(0 0 6 / .8); --muted: rgb(0 0 6 / .55);
+  --border: rgb(0 0 6 / .1); --button: rgb(0 0 6 / .07); --button-hover: rgb(0 0 6 / .12);
+  --accent: #3584e4; --accent-fg: #0461be; --accent-text: #fff; --danger: #c01c28;
+  --ok: #1b8553; --warn: #9c6e03; --radius: 6px; --card-radius: 12px;
+  --font-sans: "Adwaita Sans", Cantarell, "Inter", system-ui, sans-serif;
+  --font-mono: "Adwaita Mono", "Source Code Pro", ui-monospace, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #222226; --surface: #2e2e32; --headerbar: #2e2e32; --text: #fff; --muted: rgb(255 255 255 / .55);
+    --border: rgb(255 255 255 / .1); --button: rgb(255 255 255 / .1); --button-hover: rgb(255 255 255 / .15);
+    --accent: #3584e4; --accent-fg: #81d0ff; --danger: #ff7b63; --ok: #78e9ab; --warn: #ffc252;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 15px/1.5 var(--font-sans); -webkit-font-smoothing: antialiased; }
+a { color: var(--accent-fg); text-decoration: none; }
+a:hover { text-decoration: underline; }
+main { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1rem; }
+h1 { font-size: 1.4rem; margin: 0 0 1rem; }
+h2 { font-size: 1.15rem; margin: 0 0 .75rem; }
+.muted { color: var(--muted); }
+.error { color: var(--danger); }
+.inline { display: inline; margin: 0; }
+
+.topbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  gap: .5rem; padding: .75rem 1rem; background: var(--headerbar); border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgb(0 0 6 / .06); }
+.topbar .brand { font-weight: 700; color: var(--text); }
+.topbar .brand-subtitle { font-weight: 400; color: var(--muted); }
+.topbar nav { display: flex; align-items: center; gap: 1.25rem; }
+
+button, .button { font: inherit; font-weight: 700; padding: .35rem .9rem; border-radius: var(--radius);
+  cursor: pointer; border: 0; background: var(--button); color: var(--text); display: inline-block; }
+button:hover, .button:hover { background: var(--button-hover); text-decoration: none; }
+.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.primary:hover { background: var(--accent); filter: brightness(1.1); }
+.danger { color: var(--danger); }
+button.link { background: none; padding: 0; font-weight: 400; color: var(--accent-fg); }
+
+input, select { font: inherit; padding: .45rem .6rem; border: 1px solid var(--border);
+  border-radius: var(--radius); background: var(--bg); color: var(--text); width: 100%; }
+label { display: grid; gap: .3rem; margin-bottom: .9rem; font-weight: 500; }
+
+.card { background: var(--surface); border-radius: var(--card-radius); padding: 1.5rem;
+  box-shadow: 0 0 0 1px var(--border), 0 1px 3px rgb(0 0 6 / .08); }
+.login { max-width: 360px; margin: 10vh auto 0; }
+.login button { width: 100%; }
+
+.toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  flex-wrap: wrap; margin-bottom: 1rem; }
+.crumbs { font-size: 1.05rem; overflow-wrap: anywhere; }
+.crumbs .sep { color: var(--muted); margin: 0 .35rem; }
+
+.table-wrap { overflow-x: auto; }
+table.files { width: 100%; border-collapse: collapse; background: var(--surface);
+  border-radius: var(--card-radius); overflow: hidden; box-shadow: 0 0 0 1px var(--border), 0 1px 3px rgb(0 0 6 / .08); }
+.files th, .files td { padding: .55rem .8rem; text-align: left; border-bottom: 1px solid var(--border); }
+.files th { font-size: .8rem; font-weight: 700; color: var(--muted); }
+.files tbody tr:last-child td { border-bottom: 0; }
+.files tbody tr:hover { background: var(--button); }
+.files .num { text-align: right; white-space: nowrap; }
+.files .name { overflow-wrap: anywhere; }
+.files .actions { text-align: right; white-space: nowrap; }
+.icon { width: 24px; height: 24px; vertical-align: middle; margin: -2px .6rem 0 0; }
+.shares .link-cell { min-width: 18rem; }
+/* Size these columns to their content; the link column absorbs the rest */
+.files th.shrink { width: 1%; white-space: nowrap; }
+.shares td { white-space: nowrap; }
+.shares td.name { white-space: normal; }
+.status-revoked, .status-expired, .status-missing { opacity: .6; }
+
+.badge { font-size: .75rem; padding: .1rem .5rem; border-radius: 999px; border: 1px solid currentColor; }
+.badge.active { color: var(--ok); }
+.badge.expired, .badge.missing { color: var(--warn); }
+.badge.revoked { color: var(--danger); }
+
+.copy-row { display: flex; gap: .5rem; }
+.copy-row input { font-family: var(--font-mono); font-size: .85rem; min-width: 0; flex: 1; }
+/* Both labels share one grid cell, so the button is always wide enough for
+   "Copied!" and its width never changes when the label swaps. */
+.copy-btn { display: inline-grid; flex: none; }
+.copy-btn > span { grid-area: 1 / 1; }
+.copy-btn > span + span, .copy-btn.copied > span:first-child { visibility: hidden; }
+.copy-btn.copied > span + span { visibility: visible; }
+.copy-row.placeholder { visibility: hidden; }
+
+dialog { border: 0; border-radius: var(--card-radius); box-shadow: 0 0 0 1px var(--border), 0 8px 24px rgb(0 0 0 / .25); padding: 0; width: min(520px, 92vw);
+  background: var(--surface); color: var(--text); }
+dialog::backdrop { background: rgb(0 0 0 / .45); }
+.dialog-body { padding: 1.5rem; }
+.dialog-body .path { font-family: var(--font-mono); color: var(--muted); overflow-wrap: anywhere; }
+.dialog-body .nested { font-family: var(--font-mono); font-size: .85rem; overflow-wrap: anywhere;
+  max-height: 10rem; overflow-y: auto; }
+.dialog-actions { display: flex; justify-content: flex-end; align-items: center; gap: .75rem; margin-top: 1rem; }
+
+.public { max-width: 900px; margin: 2rem auto; }
+.public .welcome { text-align: center; font-size: 1.05rem; margin: 0 0 1.5rem; padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border); }
+.file-hero { text-align: center; padding: 1rem 0 2rem; }
+.file-hero h1 { overflow-wrap: anywhere; margin: .5rem 0 .25rem; }
+.icon.big { width: 128px; height: 128px; margin: 0; }
+.hero-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; }
+
+@media (max-width: 600px) {
+  .files th:nth-child(3), .files td:nth-child(3) { display: none; }
+}

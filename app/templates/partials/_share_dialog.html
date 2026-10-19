@@ -1,0 +1,39 @@
+<div class="dialog-body">
+{% if share %}
+  <h2>Link created</h2>
+  <p>Anyone with this link can access <strong>{{ share.name }}</strong>
+    {%- if share.expires_at %} until {{ share.expires_at|datetime }}{% endif %}.</p>
+  <div class="copy-row">
+    <input type="text" readonly value="{{ share.url }}" id="share-link" onfocus="this.select()">
+    <button class="primary copy-btn" data-copy="#share-link"><span>Copy</span><span>Copied!</span></button>
+  </div>
+  <div class="dialog-actions">
+    <a href="{{ url_for('shares.index') }}">Manage shares</a>
+    <button data-close-dialog>Done</button>
+  </div>
+{% else %}
+  <h2>Share {{ "folder" if is_dir else "file" }}</h2>
+  <p class="path">/{{ rel }}</p>
+  {% if nested %}
+  <p class="error">This folder can't be shared because it already contains
+    {{ "an active share" if nested|length == 1 else nested|length ~ " active shares" }}:</p>
+  <ul class="nested">{% for path in nested %}<li>/{{ path }}</li>{% endfor %}</ul>
+  <p class="muted">Revoke {{ "it" if nested|length == 1 else "them" }} on the
+    <a href="{{ url_for('shares.index') }}">Shares page</a> first.</p>
+  <div class="dialog-actions"><button type="button" data-close-dialog>Close</button></div>
+  {% else %}
+  <form hx-post="{{ url_for('shares.create') }}" hx-target="#share-dialog">
+    <input type="hidden" name="path" value="{{ rel }}">
+    <label>Link expires
+      <select name="expiry">
+        {% for key, (label, _) in expiry_choices.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}
+      </select>
+    </label>
+    <div class="dialog-actions">
+      <button type="button" data-close-dialog>Cancel</button>
+      <button type="submit" class="primary">Create link</button>
+    </div>
+  </form>
+  {% endif %}
+{% endif %}
+</div>

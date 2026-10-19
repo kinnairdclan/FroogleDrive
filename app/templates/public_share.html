@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ name }}{% endblock %}
+{% block content %}
+<div class="card public">
+<p class="welcome">Welcome to FroogleDrive, you've been shared a {{ "folder" if is_dir else "file" }}!
+  Please choose what you want to do with it below.</p>
+{% if not is_dir %}
+  <div class="file-hero">
+    <img class="icon big" src="{{ file_icon(name) }}" alt="" width="128" height="128">
+    <h1>{{ name }}</h1>
+    <p class="muted">{{ size|filesize }}</p>
+    <div class="hero-actions">
+      {% if viewable(name) %}
+      <a class="button" href="{{ url_for('shares.public', token=token, view=1) }}" target="_blank" rel="noopener">View in browser</a>
+      {% endif %}
+      <a class="button primary" href="{{ url_for('shares.public', token=token, dl=1) }}">Download</a>
+    </div>
+  </div>
+{% else %}
+  {% macro link(path, label) -%}
+  <a href="{{ url_for('shares.public', token=token, sub=path) if path else url_for('shares.public', token=token) }}">{{ label }}</a>
+  {%- endmacro %}
+  <div class="toolbar">
+    {% set root_label = name %}
+    {% include "partials/_breadcrumbs.html" %}
+    <a class="button primary" href="{{ url_for('shares.public_zip', token=token) }}">Download all (.zip)</a>
+  </div>
+  <table class="files">
+    <thead><tr><th>Name</th><th class="num">Size</th><th>Modified</th><th></th></tr></thead>
+    <tbody>
+    {% if parent is not none %}<tr><td colspan="4">{{ link(parent, "↩ ..") }}</td></tr>{% endif %}
+    {% for e in entries %}
+      <tr>
+        <td class="name"><img class="icon" src="{{ file_icon(e.name, e.is_dir) }}" alt="" width="24" height="24">{{ link(e.rel, e.name) }}</td>
+        <td class="num">{{ "" if e.is_dir else e.size|filesize }}</td>
+        <td>{{ e.mtime|datetime }}</td>
+        <td class="actions">
+          {% if not e.is_dir and viewable(e.name) %}
+          <a class="button" href="{{ url_for('shares.public', token=token, sub=e.rel, view=1) }}" target="_blank" rel="noopener">View</a>
+          {% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="4" class="muted">This folder is empty.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+</div>
+{% endblock %}

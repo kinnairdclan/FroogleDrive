@@ -1,0 +1,37 @@
+services:
+  froogledrive:
+    build:
+      context: .
+      args:
+        UID: ${UID:-1000}   # set UID/GID in your shell or .env to match the owner of ./data
+        GID: ${GID:-1000}
+    ports:
+      - "8000:8000"
+    # Every setting is listed here. Each takes its value from .env (or your shell)
+    # when set there; you can also replace any ${...} with a literal value.
+    # In literal values written here, escape "$" as "$$" (password hashes contain "$").
+    environment:
+      SECRET_KEY: ${SECRET_KEY:-}
+      FROOGLEDRIVE_USERNAME: ${FROOGLEDRIVE_USERNAME:-}
+      FROOGLEDRIVE_PASSWORD_HASH: ${FROOGLEDRIVE_PASSWORD_HASH:-}
+      FROOGLEDRIVE_SUBTITLE: ${FROOGLEDRIVE_SUBTITLE:-}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-}
+      FROOGLEDRIVE_TRUST_PROXY: ${FROOGLEDRIVE_TRUST_PROXY:-0}
+      FROOGLEDRIVE_SECURE_COOKIES: ${FROOGLEDRIVE_SECURE_COOKIES:-0}
+      FROOGLEDRIVE_ROOT: /data   # where the volume below is mounted inside the container
+    volumes:
+      - ./data:/data:ro          # the directory to browse/share (read-only)
+      - instance:/app/instance   # SQLite database of share links
+    # Hardening: non-root (set in Dockerfile), immutable root filesystem,
+    # no Linux capabilities, no setuid privilege escalation.
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+volumes:
+  instance:

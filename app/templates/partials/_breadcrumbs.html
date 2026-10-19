@@ -1,0 +1,5 @@
+{# expects: crumbs, root_label, crumb_url(rel) macro passed via `link` #}
+<nav class="crumbs">
+  {{ link("", root_label) }}
+  {% for name, path in crumbs %}<span class="sep">/</span>{{ link(path, name) }}{% endfor %}
+</nav>
