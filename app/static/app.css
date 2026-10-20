@@ -109,7 +109,9 @@ dialog::backdrop { background: rgb(0 0 0 / .45); }
 .dialog-body .path { font-family: var(--font-mono); color: var(--muted); overflow-wrap: anywhere; }
 .dialog-body .nested { font-family: var(--font-mono); font-size: .85rem; overflow-wrap: anywhere;
   max-height: 10rem; overflow-y: auto; }
-.dialog-actions { display: flex; justify-content: flex-end; align-items: center; gap: .75rem; margin-top: 1rem; }
+.dialog-actions { display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap;
+  gap: .75rem; margin-top: 1rem; }
+.dialog-body .filename { overflow-wrap: anywhere; }
 
 .public { max-width: 900px; margin: 2rem auto; }
 .public .welcome { text-align: center; font-size: 1.05rem; margin: 0 0 1.5rem; padding-bottom: 1.25rem;
@@ -121,5 +123,10 @@ dialog::backdrop { background: rgb(0 0 0 / .45); }
 .hero-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; }
 
 @media (max-width: 600px) {
-  .files th:nth-child(3), .files td:nth-child(3) { display: none; }
+  .files th:nth-child(3), .files td:nth-child(3), .files .hide-mobile { display: none; }
+  /* max-width: 0 lets the name column shrink below its text; width: 100% gives it the rest */
+  .listing td.name { max-width: 0; width: 100%; white-space: nowrap; }
+  .listing td.name a { display: inline-flex; max-width: calc(100% - 24px - .6rem); vertical-align: middle; }
+  .listing .stem { overflow: hidden; text-overflow: ellipsis; }
+  .listing .ext { flex: none; }
 }

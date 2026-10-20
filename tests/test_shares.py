@@ -334,3 +334,35 @@ def test_dotfiles_hidden_in_folder_share(app, make_share, dotfiles):
 def test_dotfiles_still_visible_to_owner(auth_client, dotfiles):
     page = auth_client.get("/browse/sub").get_data(as_text=True)
     assert ".env" in page and ".stversions" in page
+
+
+def test_file_details(auth_client, make_share):
+    page = auth_client.get("/shares/details?path=a.txt").get_data(as_text=True)
+    assert "a.txt" in page and "5 B" in page and 'id="share-link"' not in page
+    assert ">Share</button>" in page
+    token = make_share("a.txt")
+    page = auth_client.get("/shares/details?path=a.txt").get_data(as_text=True)
+    assert f"/shares/{token}" in page and ">New link</button>" in page
+
+
+def test_file_details_skips_inactive(app, auth_client, make_share):
+    token = make_share("a.txt")
+    auth_client.delete(f"/shares/{token}")
+    page = auth_client.get("/shares/details?path=a.txt").get_data(as_text=True)
+    assert token not in page
+
+
+@pytest.mark.parametrize("path", ["sub", "missing.txt", "../x"])
+def test_file_details_files_only(auth_client, path):
+    assert auth_client.get(f"/shares/details?path={path}").status_code == 404
+
+
+def test_file_details_requires_login(client):
+    assert client.get("/shares/details?path=a.txt").status_code == 302
+
+
+def test_names_split_for_truncation(auth_client):
+    page = auth_client.get("/browse/").get_data(as_text=True)
+    assert '<span class="stem">a</span><span class="ext">.txt</span>' in page
+    assert '<span class="stem">sub</span><span class="ext"></span>' in page
+    assert 'data-details="/shares/details?path=a.txt"' in page

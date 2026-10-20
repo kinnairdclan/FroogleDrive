@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ name }}{% endblock %}
+{% from "partials/_name.html" import entry_name %}
 {% block content %}
 <div class="card public">
 <p class="welcome">Welcome to FroogleDrive, you've been shared a {{ "folder" if is_dir else "file" }}!
@@ -26,13 +27,13 @@
     {% include "partials/_breadcrumbs.html" %}
     <a class="button primary" href="{{ url_for('shares.public_zip', token=token) }}">Download all (.zip)</a>
   </div>
-  <table class="files">
+  <table class="files listing">
     <thead><tr><th>Name</th><th class="num">Size</th><th>Modified</th><th></th></tr></thead>
     <tbody>
     {% if parent is not none %}<tr><td colspan="4">{{ link(parent, "↩ ..") }}</td></tr>{% endif %}
     {% for e in entries %}
       <tr>
-        <td class="name"><img class="icon" src="{{ file_icon(e.name, e.is_dir) }}" alt="" width="24" height="24">{{ link(e.rel, e.name) }}</td>
+        <td class="name"><img class="icon" src="{{ file_icon(e.name, e.is_dir) }}" alt="" width="24" height="24">{{ link(e.rel, entry_name(e.name, e.is_dir)) }}</td>
         <td class="num">{{ "" if e.is_dir else e.size|filesize }}</td>
         <td>{{ e.mtime|datetime }}</td>
         <td class="actions">

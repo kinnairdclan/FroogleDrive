@@ -1,0 +1,5 @@
+{# A file name split so CSS can truncate the stem and keep the extension visible #}
+{% macro entry_name(name, is_dir=False) -%}
+{% set stem, ext = split_name(name, is_dir) -%}
+<span class="stem">{{ stem }}</span><span class="ext">{{ ext }}</span>
+{%- endmacro %}

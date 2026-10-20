@@ -133,6 +133,26 @@ def new():
     return share_form(root, fs.resolve(root, request.args.get("path", "")))
 
 
+@bp.get("/details")
+@login_required
+def details():
+    """File info dialog (mobile): size, date and its current link if shared."""
+    root = current_app.config["FROOGLEDRIVE_ROOT"]
+    target = fs.resolve(root, request.args.get("path", ""))
+    if not os.path.isfile(target):
+        abort(404)
+    rel = fs.relative(root, target)
+    rows = get_db().execute(
+        "SELECT * FROM shares WHERE rel_path = ? AND revoked = 0 ORDER BY created_at DESC", (rel,)
+    ).fetchall()
+    share = next((share_view(r) for r in rows if share_status(r) == "active"), None)
+    stat = os.stat(target)
+    return render_template(
+        "partials/_file_dialog.html", rel=rel, name=os.path.basename(target),
+        size=stat.st_size, mtime=stat.st_mtime, share=share,
+    )
+
+
 @bp.post("")
 @login_required
 def create():

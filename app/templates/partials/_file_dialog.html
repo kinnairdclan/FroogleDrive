@@ -1,0 +1,17 @@
+<div class="dialog-body">
+  <h2 class="filename">{{ name }}</h2>
+  <p class="muted">{{ size|filesize }} · Modified {{ mtime|datetime }}</p>
+  {% if share %}
+  <p>Shared{% if share.expires_at %} until {{ share.expires_at|datetime }}{% endif %}:</p>
+  <div class="copy-row">
+    <input type="text" readonly value="{{ share.url }}" id="share-link">
+    <button class="primary copy-btn" data-copy="#share-link"><span>Copy</span><span>Copied!</span></button>
+  </div>
+  {% endif %}
+  <div class="dialog-actions">
+    <button data-close-dialog>Close</button>
+    <a class="button" href="{{ url_for('browse.browse', rel=rel) }}">Download</a>
+    <button {% if not share %}class="primary" {% endif %}hx-get="{{ url_for('shares.new', path=rel) }}"
+            hx-target="#share-dialog">{{ "New link" if share else "Share" }}</button>
+  </div>
+</div>

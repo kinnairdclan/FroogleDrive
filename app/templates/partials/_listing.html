@@ -1,3 +1,4 @@
+{% from "partials/_name.html" import entry_name %}
 {% macro link(path, label) -%}
 <a href="{{ url_for('browse.browse', rel=path) }}" hx-get="{{ url_for('browse.browse', rel=path) }}"
    hx-target="#listing" hx-push-url="true">{{ label }}</a>
@@ -8,8 +9,8 @@
   {% include "partials/_breadcrumbs.html" %}
   <button class="primary" hx-get="{{ url_for('shares.new', path=rel) }}" hx-target="#share-dialog">Share this folder</button>
 </div>
-<table class="files">
-  <thead><tr><th>Name</th><th class="num">Size</th><th>Modified</th><th></th></tr></thead>
+<table class="files listing">
+  <thead><tr><th>Name</th><th class="num hide-mobile">Size</th><th>Modified</th><th class="hide-mobile"></th></tr></thead>
   <tbody>
   {% if parent is not none %}
     <tr><td colspan="4">{{ link(parent, "↩ ..") }}</td></tr>
@@ -18,12 +19,14 @@
     <tr>
       <td class="name">
         <img class="icon" src="{{ file_icon(e.name, e.is_dir) }}" alt="" width="24" height="24">
-        {% if e.is_dir %}{{ link(e.rel, e.name) }}
-        {% else %}<a href="{{ url_for('browse.browse', rel=e.rel) }}">{{ e.name }}</a>{% endif %}
+        {% if e.is_dir %}{{ link(e.rel, entry_name(e.name, True)) }}
+        {# On phones a tap opens the details dialog instead of downloading (app.js) #}
+        {% else %}<a href="{{ url_for('browse.browse', rel=e.rel) }}" title="{{ e.name }}"
+                     data-details="{{ url_for('shares.details', path=e.rel) }}">{{ entry_name(e.name) }}</a>{% endif %}
       </td>
-      <td class="num">{{ "" if e.is_dir else e.size|filesize }}</td>
+      <td class="num hide-mobile">{{ "" if e.is_dir else e.size|filesize }}</td>
       <td>{{ e.mtime|datetime }}</td>
-      <td class="actions">
+      <td class="actions hide-mobile">
         <button hx-get="{{ url_for('shares.new', path=e.rel) }}" hx-target="#share-dialog">Share</button>
       </td>
     </tr>

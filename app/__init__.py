@@ -93,6 +93,11 @@ def create_app(test_config=None, instance_path=None):
     def file_icon(name, is_dir=False):
         return url_for("static", filename=f"icons/{icon_name(name, is_dir)}.svg")
 
+    @app.template_global()
+    def split_name(name, is_dir=False):
+        """(stem, extension); folders keep their whole name as the stem."""
+        return (name, "") if is_dir else os.path.splitext(name)
+
     @app.template_filter("filesize")
     def filesize(num):
         if num < 1024:
