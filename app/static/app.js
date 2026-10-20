@@ -1,7 +1,7 @@
 // Open the share dialog whenever HTMX swaps content into it.
-document.addEventListener("htmx:afterSwap", (e) => {
-  const dialog = e.detail.target;
-  if (dialog.id === "share-dialog" && !dialog.open) dialog.showModal();
+document.addEventListener("htmx:after:swap", (e) => {
+  const dialog = e.detail.ctx.target;
+  if (dialog?.id === "share-dialog" && !dialog.open) dialog.showModal();
 });
 
 document.addEventListener("click", async (e) => {

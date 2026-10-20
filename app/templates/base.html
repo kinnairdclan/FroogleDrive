@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}FroogleDrive{% endblock %}</title>
-  {# Keep htmx compatible with the CSP: no eval, no inline <style> or <script> #}
-  <meta name="htmx-config" content='{"allowEval": false, "allowScriptTags": false, "includeIndicatorStyles": false}'>
+  {# htmx 4: no injected indicator CSS (unused), and leave 4xx/5xx responses unswapped as htmx 2 did #}
+  <meta name="htmx-config" content='{"includeIndicatorCSS": false, "noSwap": [204, 304, "4xx", "5xx"]}'>
   <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
   <script src="{{ url_for('static', filename='htmx.min.js') }}" defer></script>
   <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </head>
-<body hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'>
+<body hx-headers:inherited='{"X-CSRFToken": "{{ csrf_token() }}"}'>
   <header class="topbar">
     {% set brand_text %}FroogleDrive
       {%- if brand_subtitle %} <span class="brand-subtitle">({{ brand_subtitle }})</span>{% endif %}{% endset %}

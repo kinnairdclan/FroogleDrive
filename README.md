@@ -46,7 +46,7 @@ Change the bind mount in `docker-compose.yml` to point at your own directory.
   (LGPLv3 / CC-BY-SA 3.0) in `app/static/icons/`, licence files included.
 - Fonts: [Adwaita Sans / Adwaita Mono](https://gitlab.gnome.org/GNOME/adwaita-fonts)
   (SIL OFL 1.1), GNOME's interface fonts, in `app/static/fonts/`, converted to WOFF2.
-- [HTMX](https://htmx.org) 2.0.4 (BSD Zero Clause).
+- [HTMX](https://htmx.org) 4.0.0 (BSD Zero Clause).
 
 ## Development
 
