@@ -8,6 +8,7 @@
   <div class="file-hero">
     <img class="icon big" src="{{ file_icon(name) }}" alt="" width="128" height="128">
     <h1>{{ name }}</h1>
+    {% if description %}<p class="description">“{{ description }}”</p>{% endif %}
     <p class="muted">{{ size|filesize }}</p>
     <div class="hero-actions">
       {% if viewable(name) %}

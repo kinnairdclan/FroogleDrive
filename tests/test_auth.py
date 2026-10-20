@@ -17,8 +17,11 @@ def test_htmx_gets_hx_redirect(client):
 
 
 def test_bad_password(client):
-    resp = client.post("/login", data={"username": "admin", "password": "nope"})
-    assert resp.status_code == 401
+    resp = client.post("/login?next=/browse/sub", data={"username": "admin", "password": "nope"})
+    assert resp.status_code == 302 and resp.headers["Location"] == "/login?next=/browse/sub"
+    resp = client.get(resp.headers["Location"])
+    assert resp.status_code == 401 and b"Invalid" in resp.data
+    assert b"Invalid" not in client.get("/login").data  # shown once, not on refresh
     assert client.get("/browse/").status_code == 302
 
 
@@ -38,7 +41,7 @@ def test_throttle(client):
         client.post("/login", data={"username": "admin", "password": "x"},
                     environ_base={"REMOTE_ADDR": "10.9.9.9"})
     resp = client.post("/login", data={"username": "admin", "password": "s3cret"},
-                       environ_base={"REMOTE_ADDR": "10.9.9.9"})
+                       environ_base={"REMOTE_ADDR": "10.9.9.9"}, follow_redirects=True)
     assert resp.status_code == 401
     assert b"Too many" in resp.data
 

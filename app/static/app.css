@@ -112,6 +112,7 @@ dialog::backdrop { background: rgb(0 0 0 / .45); }
   border-bottom: 1px solid var(--border); }
 .file-hero { text-align: center; padding: 1rem 0 2rem; }
 .file-hero h1 { overflow-wrap: anywhere; margin: .5rem 0 .25rem; }
+.file-hero .description { overflow-wrap: anywhere; margin: 0; }
 .icon.big { width: 128px; height: 128px; margin: 0; }
 .hero-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; }
 

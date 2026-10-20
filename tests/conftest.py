@@ -52,8 +52,9 @@ def auth_client(client):
 
 @pytest.fixture
 def make_share(auth_client):
-    def make(path, expiry="never"):
-        resp = auth_client.post("/shares", data={"path": path, "expiry": expiry})
+    def make(path, expiry="never", description=""):
+        resp = auth_client.post("/shares", data={"path": path, "expiry": expiry,
+                                                 "description": description})
         assert resp.status_code == 200
         html = resp.get_data(as_text=True)
         start = html.index("/shares/", html.index('id="share-link"') - 200) + len("/shares/")

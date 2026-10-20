@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.13-slim
 
 # Match these to the owner of the files you mount at /data (see `id -u` / `id -g`)
 ARG UID=1000

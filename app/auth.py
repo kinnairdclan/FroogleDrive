@@ -52,7 +52,7 @@ def login_required(view):
 
 @bp.route("/login", methods=["GET", "POST"])
 def login():
-    error = None
+    error = session.pop("login_error", None)
     if request.method == "POST":
         ip = request.remote_addr or "unknown"
         now = time.monotonic()
@@ -72,6 +72,9 @@ def login():
                 return redirect(_safe_next(request.args.get("next")))
             _record_failure(ip, now)
             error = "Invalid username or password."
+        # Post/Redirect/Get: refreshing the page shouldn't resubmit the form
+        session["login_error"] = error
+        return redirect(request.full_path.rstrip("?"))
     return render_template("login.html", error=error), 401 if error else 200
 
 

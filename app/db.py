@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS shares (
     is_dir     INTEGER NOT NULL,
     created_at TEXT NOT NULL,
     expires_at TEXT,
-    revoked    INTEGER NOT NULL DEFAULT 0
+    revoked    INTEGER NOT NULL DEFAULT 0,
+    description TEXT
 );
 """
 
@@ -30,4 +31,10 @@ def close_db(_exc=None):
 def init_app(app):
     app.teardown_appcontext(close_db)
     with app.app_context():
-        get_db().executescript(SCHEMA)
+        db = get_db()
+        db.executescript(SCHEMA)
+        # Databases created before descriptions existed lack the column
+        columns = {row["name"] for row in db.execute("PRAGMA table_info(shares)")}
+        if "description" not in columns:
+            db.execute("ALTER TABLE shares ADD COLUMN description TEXT")
+            db.commit()

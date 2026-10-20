@@ -30,6 +30,8 @@ EXPIRY_CHOICES = {
     "30d": ("30 days", timedelta(days=30)),
 }
 
+MAX_DESCRIPTION = 128
+
 
 def _now():
     return datetime.now(timezone.utc)
@@ -107,6 +109,7 @@ def share_form(root, target):
         is_dir=is_dir,
         nested=[r["rel_path"] for r in nested],
         expiry_choices=EXPIRY_CHOICES,
+        max_description=MAX_DESCRIPTION,
     )
 
 
@@ -138,6 +141,9 @@ def create():
     expiry = request.form.get("expiry", "never")
     if expiry not in EXPIRY_CHOICES:
         abort(400)
+    description = request.form.get("description", "").strip()
+    if len(description) > MAX_DESCRIPTION:
+        abort(400)
     if os.path.isdir(target) and shares_inside(fs.relative(root, target)):
         return share_form(root, target)  # shows why it can't be shared
     delta = EXPIRY_CHOICES[expiry][1]
@@ -145,13 +151,15 @@ def create():
     token = secrets.token_urlsafe(24)
     db = get_db()
     db.execute(
-        "INSERT INTO shares (token, rel_path, is_dir, created_at, expires_at) VALUES (?, ?, ?, ?, ?)",
+        "INSERT INTO shares (token, rel_path, is_dir, created_at, expires_at, description)"
+        " VALUES (?, ?, ?, ?, ?, ?)",
         (
             token,
             fs.relative(root, target),
             int(os.path.isdir(target)),
             now.isoformat(),
             (now + delta).isoformat() if delta else None,
+            description or None,
         ),
     )
     db.commit()
@@ -209,7 +217,7 @@ def public(token, sub):
             return send_shared_file(share_root)
         return render_template(
             "public_share.html", public=True, token=token, name=name, is_dir=False,
-            size=os.path.getsize(share_root),
+            size=os.path.getsize(share_root), description=row["description"],
         )
 
     # Directory share: the shared folder becomes the root for all lookups

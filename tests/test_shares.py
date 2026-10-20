@@ -104,6 +104,33 @@ def test_invalid_expiry(auth_client):
     assert auth_client.post("/shares", data={"path": "a.txt", "expiry": "99y"}).status_code == 400
 
 
+def test_description(app, make_share):
+    token = make_share("a.txt", description="  Tax <b>docs</b>  ")
+    page = app.test_client().get(f"/shares/{token}").get_data(as_text=True)
+    assert "“Tax &lt;b&gt;docs&lt;/b&gt;”" in page
+    plain = make_share("a.txt")
+    assert 'class="description"' not in app.test_client().get(f"/shares/{plain}").get_data(as_text=True)
+
+
+def test_description_too_long(auth_client):
+    data = {"path": "a.txt", "expiry": "never", "description": "x" * 129}
+    assert auth_client.post("/shares", data=data).status_code == 400
+
+
+def test_description_column_migrated(app):
+    import sqlite3
+    from app.db import init_app
+    db = sqlite3.connect(app.config["DATABASE"])
+    db.executescript("DROP TABLE shares; CREATE TABLE shares (token TEXT PRIMARY KEY, rel_path TEXT NOT NULL,"
+                     " is_dir INTEGER NOT NULL, created_at TEXT NOT NULL, expires_at TEXT,"
+                     " revoked INTEGER NOT NULL DEFAULT 0);")
+    db.close()
+    init_app(app)
+    with app.app_context():
+        from app.db import get_db
+        assert "description" in {r["name"] for r in get_db().execute("PRAGMA table_info(shares)")}
+
+
 def test_manage_page(auth_client, make_share):
     token = make_share("sub", expiry="7d")
     page = auth_client.get("/shares").get_data(as_text=True)

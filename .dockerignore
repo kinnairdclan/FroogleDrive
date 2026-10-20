@@ -6,3 +6,5 @@ tests
 data
 .env
 .git
+.woodpecker.yml
+.coveragerc
