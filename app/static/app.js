@@ -26,6 +26,11 @@ document.addEventListener("click", async (e) => {
   btn.copiedTimer = setTimeout(() => btn.classList.remove("copied"), 1500);
 });
 
+// Select a share link's full text when its field gets focus.
+document.addEventListener("focusin", (e) => {
+  if (e.target.matches(".copy-row input[readonly]")) e.target.select();
+});
+
 // Close the dialog when clicking the backdrop.
 document.addEventListener("click", (e) => {
   if (e.target.id === "share-dialog") e.target.close();

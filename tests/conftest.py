@@ -29,7 +29,7 @@ def data_root(tmp_path):
 def app(tmp_path, data_root):
     return create_app({
         "TESTING": True,
-        "SECRET_KEY": "test",
+        "SECRET_KEY": "test-" + "k" * 32,
         "FROOGLEDRIVE_ROOT": str(data_root),
         "FROOGLEDRIVE_USERNAME": USERNAME,
         "FROOGLEDRIVE_PASSWORD_HASH": generate_password_hash(PASSWORD),

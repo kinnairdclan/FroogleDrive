@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash
 from app import create_app, hash_password
 
 ENV = {
-    "SECRET_KEY": "env-secret",
+    "SECRET_KEY": "env-secret-" + "k" * 32,
     "FROOGLEDRIVE_USERNAME": "envuser",
     "FROOGLEDRIVE_PASSWORD_HASH": generate_password_hash("envpw"),
 }
@@ -90,3 +90,25 @@ def test_hash_password_rejects(monkeypatch, answers, message):
     monkeypatch.setattr(hash_password.getpass, "getpass", lambda prompt: next(replies))
     with pytest.raises(SystemExit, match=message):
         hash_password.main()
+
+
+def test_security_headers(client):
+    resp = client.get("/login")
+    assert resp.headers["X-Frame-Options"] == "DENY"
+    assert resp.headers["X-Content-Type-Options"] == "nosniff"
+    assert resp.headers["Referrer-Policy"] == "no-referrer"
+    assert "frame-ancestors 'none'" in resp.headers["Content-Security-Policy"]
+    assert "Strict-Transport-Security" not in resp.headers
+    assert "onfocus" not in resp.get_data(as_text=True)
+
+
+def test_no_csp_on_files(app, make_share):
+    token = make_share("a.txt")
+    resp = app.test_client().get(f"/shares/{token}?dl=1")
+    assert "Content-Security-Policy" not in resp.headers
+    assert resp.headers["X-Frame-Options"] == "DENY"
+
+
+def test_hsts_with_secure_cookies(app, client):
+    app.config["SESSION_COOKIE_SECURE"] = True
+    assert client.get("/login").headers["Strict-Transport-Security"] == "max-age=31536000"

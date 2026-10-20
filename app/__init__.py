@@ -13,6 +13,13 @@ from .icons import icon_name
 csrf = CSRFProtect()
 
 REQUIRED_SETTINGS = ("SECRET_KEY", "FROOGLEDRIVE_USERNAME", "FROOGLEDRIVE_PASSWORD_HASH")
+MIN_SECRET_KEY_LENGTH = 32
+EXAMPLE_SECRET_KEY = "change-me-to-a-long-random-string"  # shipped in older .env.example
+
+CSP = (
+    "default-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; "
+    "frame-ancestors 'none'"
+)
 
 
 class TokenConverter(BaseConverter):
@@ -33,6 +40,13 @@ def create_app(test_config=None, instance_path=None):
             "Missing required settings: " + ", ".join(missing)
             + ". Generate a password hash with: python -m app.hash_password"
         )
+    # Anyone who knows or guesses the key can forge a logged-in session cookie
+    key = app.config["SECRET_KEY"]
+    if len(key) < MIN_SECRET_KEY_LENGTH or key == EXAMPLE_SECRET_KEY:
+        raise RuntimeError(
+            f"SECRET_KEY must be a random string of at least {MIN_SECRET_KEY_LENGTH} characters."
+            " Generate one with: python -c \"import secrets; print(secrets.token_hex(32))\""
+        )
 
     os.makedirs(app.instance_path, exist_ok=True)
     if not app.config.get("DATABASE"):
@@ -52,6 +66,18 @@ def create_app(test_config=None, instance_path=None):
     app.register_blueprint(auth.bp)
     app.register_blueprint(browse.bp)
     app.register_blueprint(shares.bp)
+
+    @app.after_request
+    def security_headers(resp):
+        resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+        resp.headers.setdefault("X-Frame-Options", "DENY")
+        resp.headers.setdefault("Referrer-Policy", "no-referrer")  # share tokens live in URLs
+        if resp.mimetype == "text/html":
+            # Pages only; inline-viewed files keep none so browser PDF/video viewers work
+            resp.headers.setdefault("Content-Security-Policy", CSP)
+        if app.config.get("SESSION_COOKIE_SECURE"):
+            resp.headers.setdefault("Strict-Transport-Security", "max-age=31536000")
+        return resp
 
     @app.context_processor
     def brand():

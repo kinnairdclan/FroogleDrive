@@ -21,4 +21,6 @@ COPY app ./app
 USER ${UID}:${GID}
 
 EXPOSE 8000
-CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:8000", "--worker-tmp-dir", "/tmp", "--access-logfile", "-", "app:create_app()"]
+# Threaded workers: sync workers are killed mid-stream after 30s, truncating large
+# downloads, and two slow downloads would occupy every worker
+CMD ["gunicorn", "-w", "2", "--worker-class", "gthread", "--threads", "8", "-b", "0.0.0.0:8000", "--worker-tmp-dir", "/tmp", "--access-logfile", "-", "app:create_app()"]

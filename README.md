@@ -19,7 +19,7 @@ Change the bind mount in `docker-compose.yml` to point at your own directory.
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `SECRET_KEY` | — (required) | Flask session signing key |
+| `SECRET_KEY` | — (required) | Flask session signing key, at least 32 random characters |
 | `FROOGLEDRIVE_USERNAME` | — (required) | Login username |
 | `FROOGLEDRIVE_PASSWORD_HASH` | — (required) | Werkzeug hash from `python -m app.hash_password` |
 | `FROOGLEDRIVE_SUBTITLE` | — | Text shown in parentheses after the name in the header |
@@ -37,6 +37,8 @@ Change the bind mount in `docker-compose.yml` to point at your own directory.
   and offer `/shares/<token>.zip` for the whole folder as a streamed zip.
 - Expiry can be never, 1, 7, or 30 days. Revoke links from the **Shares** page.
   Revoked, expired, unknown, and deleted-target links all return a plain 404.
+- Dotfiles and dot-folders (`.stversions`, `.git`, `.env`, ...) inside a shared
+  folder are hidden: not listed, not downloadable, and left out of the zip.
 
 ## Third-party assets
 

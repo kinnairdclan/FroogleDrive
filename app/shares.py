@@ -220,8 +220,12 @@ def public(token, sub):
             size=os.path.getsize(share_root), description=row["description"],
         )
 
-    # Directory share: the shared folder becomes the root for all lookups
+    # Directory share: the shared folder becomes the root for all lookups.
+    # Dotfiles (.stversions, .git, .env, ...) are never public, whether named
+    # directly or reached through a symlink.
     target = fs.resolve(share_root, sub)
+    if fs.is_hidden(sub) or fs.is_hidden(fs.relative(share_root, target)):
+        abort(404)
     if os.path.isfile(target):
         return send_shared_file(target)
     rel = fs.relative(share_root, target)
@@ -229,7 +233,7 @@ def public(token, sub):
         "public_share.html", public=True, token=token, name=name, is_dir=True, rel=rel,
         crumbs=fs.breadcrumbs(rel),
         parent=os.path.dirname(rel) if rel else None,
-        entries=fs.list_dir(share_root, target),
+        entries=fs.list_dir(share_root, target, hide_dotfiles=True),
     )
 
 
@@ -239,7 +243,7 @@ def public_zip(token):
     if not row["is_dir"]:
         abort(404)
     zs = ZipStream(sized=True)
-    for path, arcname in fs.walk_files(share_root):
+    for path, arcname in fs.walk_files(share_root, hide_dotfiles=True):
         zs.add_path(path, arcname)
     filename = (os.path.basename(share_root) or "share") + ".zip"
     ascii_name = filename.encode("ascii", "replace").decode().replace('"', "_")

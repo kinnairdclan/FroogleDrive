@@ -6,7 +6,7 @@
   <td class="link-cell">
     {% if share.status == "active" %}
     <div class="copy-row">
-      <input type="text" readonly value="{{ share.url }}" id="link-{{ share.token }}" onfocus="this.select()">
+      <input type="text" readonly value="{{ share.url }}" id="link-{{ share.token }}">
       <button class="copy-btn" data-copy="#link-{{ share.token }}"><span>Copy</span><span>Copied!</span></button>
     </div>
     {% else %}

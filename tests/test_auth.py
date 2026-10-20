@@ -30,7 +30,8 @@ def test_login_redirects_to_next(client):
     assert resp.headers["Location"] == "/browse/sub"
 
 
-@pytest.mark.parametrize("nxt", ["//evil.com", "/%5Cevil.com", "https://evil.com"])
+@pytest.mark.parametrize("nxt", ["//evil.com", "/%5Cevil.com", "https://evil.com",
+                                 "/%09/evil.com", "/%0a/evil.com", "/%0d/evil.com", "/%7f/evil.com"])
 def test_open_redirect_blocked(client, nxt):
     resp = client.post(f"/login?next={nxt}", data={"username": "admin", "password": "s3cret"})
     assert resp.headers["Location"] == "/"
@@ -48,7 +49,14 @@ def test_throttle(client):
 
 def test_missing_settings_fail_fast(tmp_path):
     with pytest.raises(RuntimeError, match="FROOGLEDRIVE_USERNAME"):
-        create_app({"SECRET_KEY": "x", "FROOGLEDRIVE_USERNAME": None,
+        create_app({"SECRET_KEY": "x" * 32, "FROOGLEDRIVE_USERNAME": None,
+                    "FROOGLEDRIVE_PASSWORD_HASH": "x", "DATABASE": str(tmp_path / "db")})
+
+
+@pytest.mark.parametrize("key", ["short", "change-me-to-a-long-random-string"])
+def test_weak_secret_key_refused(tmp_path, key):
+    with pytest.raises(RuntimeError, match="SECRET_KEY must be"):
+        create_app({"SECRET_KEY": key, "FROOGLEDRIVE_USERNAME": "u",
                     "FROOGLEDRIVE_PASSWORD_HASH": "x", "DATABASE": str(tmp_path / "db")})
 
 

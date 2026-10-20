@@ -4,7 +4,7 @@
   <p>Anyone with this link can access <strong>{{ share.name }}</strong>
     {%- if share.expires_at %} until {{ share.expires_at|datetime }}{% endif %}.</p>
   <div class="copy-row">
-    <input type="text" readonly value="{{ share.url }}" id="share-link" onfocus="this.select()">
+    <input type="text" readonly value="{{ share.url }}" id="share-link">
     <button class="primary copy-btn" data-copy="#share-link"><span>Copy</span><span>Copied!</span></button>
   </div>
   <div class="dialog-actions">

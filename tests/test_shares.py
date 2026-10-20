@@ -1,4 +1,5 @@
 import io
+import os
 import re
 import shutil
 import zipfile
@@ -302,3 +303,34 @@ def test_target_type_changed(app, data_root, make_share):
     (data_root / "a.txt").unlink()
     (data_root / "a.txt").mkdir()   # same path, now a folder
     assert app.test_client().get(f"/shares/{token}").status_code == 404
+
+
+@pytest.fixture
+def dotfiles(data_root):
+    sub = data_root / "sub"
+    (sub / ".env").write_text("SECRET=1")
+    (sub / ".stversions").mkdir()
+    (sub / ".stversions" / "old.txt").write_text("old")
+    (sub / "deep" / ".hidden").write_text("h")
+    os.symlink(sub / ".env", sub / "env-link")
+    os.symlink(sub / ".stversions", sub / "versions-link")
+    return sub
+
+
+def test_dotfiles_hidden_in_folder_share(app, make_share, dotfiles):
+    token = make_share("sub")
+    c = app.test_client()
+    page = c.get(f"/shares/{token}").get_data(as_text=True)
+    for name in [".env", ".stversions", "env-link", "versions-link"]:
+        assert name not in page
+    assert "b.txt" in page
+    for sub in [".env", ".stversions", ".stversions/old.txt", "deep/.hidden",
+                "env-link", "versions-link", "versions-link/old.txt"]:
+        assert c.get(f"/shares/{token}/{sub}").status_code == 404, sub
+    zf = zipfile.ZipFile(io.BytesIO(c.get(f"/shares/{token}.zip").data))
+    assert sorted(zf.namelist()) == ["b.txt", "deep/c.txt"]
+
+
+def test_dotfiles_still_visible_to_owner(auth_client, dotfiles):
+    page = auth_client.get("/browse/sub").get_data(as_text=True)
+    assert ".env" in page and ".stversions" in page

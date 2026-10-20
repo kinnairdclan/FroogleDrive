@@ -8,6 +8,10 @@ steps:
 
   - name: build
     image: plugins/docker
+    # Production pulls :latest, so only reviewed code on master may publish it
+    when:
+      - event: push
+        branch: master
     settings:
       repo: kinnairdclan/froogledrive
       tags:

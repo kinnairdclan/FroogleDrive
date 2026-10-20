@@ -31,8 +31,12 @@ def _record_failure(ip, now):
 
 
 def _safe_next(target):
-    # Only allow local paths, never "//host" or absolute URLs
-    if target and target.startswith("/") and not target.startswith(("//", "/\\")):
+    # Only allow local paths, never "//host" or absolute URLs. Control characters
+    # are refused because browsers strip them, turning "/<TAB>/host" into "//host".
+    if (
+        target and target.startswith("/") and not target.startswith(("//", "/\\"))
+        and not any(c < " " or c == "\x7f" for c in target)
+    ):
         return target
     return url_for("browse.index")
 

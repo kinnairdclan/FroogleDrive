@@ -33,6 +33,11 @@ def relative(root, path):
     return "" if rel == "." else rel
 
 
+def is_hidden(rel):
+    """True if any component of relative path `rel` is a dotfile or dot-directory."""
+    return any(part.startswith(".") for part in rel.split(os.sep))
+
+
 def breadcrumbs(rel):
     """[(name, rel_path), ...] for each component of `rel`."""
     crumbs, parts = [], []
@@ -42,11 +47,12 @@ def breadcrumbs(rel):
     return crumbs
 
 
-def list_dir(root, path):
+def list_dir(root, path, hide_dotfiles=False):
     """Entries of directory `path`, directories first, then by name.
 
     Each entry: name, rel (relative to `root`), is_dir, size, mtime.
-    Symlinks pointing outside `root` and unreadable entries are skipped.
+    Symlinks pointing outside `root` and unreadable entries are skipped, as are
+    dotfiles (and symlinks to them) when `hide_dotfiles` is set.
     """
     real_root = os.path.realpath(root)
     entries = []
@@ -56,10 +62,14 @@ def list_dir(root, path):
         return entries
     with it:
         for entry in it:
+            if hide_dotfiles and entry.name.startswith("."):
+                continue
             try:
                 if entry.is_symlink():
                     target = os.path.realpath(entry.path)
                     if not is_within(real_root, target):
+                        continue
+                    if hide_dotfiles and is_hidden(relative(real_root, target)):
                         continue
                 st = entry.stat()
                 is_dir = entry.is_dir()
@@ -76,16 +86,22 @@ def list_dir(root, path):
     return entries
 
 
-def walk_files(root):
+def walk_files(root, hide_dotfiles=False):
     """Yield (absolute_path, archive_name) for every file under `root`.
 
     Symlinked directories are not descended into; symlinked files are only
-    included when they resolve inside `root`.
+    included when they resolve inside `root`. With `hide_dotfiles`, dotfiles,
+    dot-directories and symlinks to them are left out.
     """
     real_root = os.path.realpath(root)
-    for dirpath, _dirnames, filenames in os.walk(real_root, followlinks=False):
+    for dirpath, dirnames, filenames in os.walk(real_root, followlinks=False):
+        if hide_dotfiles:
+            dirnames[:] = [d for d in dirnames if not d.startswith(".")]
+            filenames = [f for f in filenames if not f.startswith(".")]
         for name in filenames:
             full = os.path.join(dirpath, name)
             target = os.path.realpath(full)
+            if hide_dotfiles and is_hidden(relative(real_root, target)):
+                continue
             if is_within(real_root, target) and os.path.isfile(target):
                 yield target, os.path.relpath(full, real_root)
