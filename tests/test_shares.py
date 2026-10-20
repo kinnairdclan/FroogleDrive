@@ -366,3 +366,15 @@ def test_names_split_for_truncation(auth_client):
     assert '<span class="stem">a</span><span class="ext">.txt</span>' in page
     assert '<span class="stem">sub</span><span class="ext"></span>' in page
     assert 'data-details="/shares/details?path=a.txt"' in page
+
+
+def test_file_details_shows_newest_share(auth_client, make_share):
+    old, new = make_share("a.txt"), make_share("a.txt")
+    page = auth_client.get("/shares/details?path=a.txt").get_data(as_text=True)
+    assert f"/shares/{new}" in page and old not in page
+
+
+def test_dotted_folder_name_not_split(auth_client, data_root):
+    (data_root / "photos.2024").mkdir()
+    page = auth_client.get("/browse/").get_data(as_text=True)
+    assert '<span class="stem">photos.2024</span><span class="ext"></span>' in page
