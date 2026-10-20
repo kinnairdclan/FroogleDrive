@@ -71,7 +71,9 @@ def create_app(test_config=None, instance_path=None):
     def security_headers(resp):
         resp.headers.setdefault("X-Content-Type-Options", "nosniff")
         resp.headers.setdefault("X-Frame-Options", "DENY")
-        resp.headers.setdefault("Referrer-Policy", "no-referrer")  # share tokens live in URLs
+        # same-origin, not no-referrer: share tokens live in URLs, but Flask-WTF
+        # rejects HTTPS form posts that carry no same-origin Referer
+        resp.headers.setdefault("Referrer-Policy", "same-origin")
         if resp.mimetype == "text/html":
             # Pages only; inline-viewed files keep none so browser PDF/video viewers work
             resp.headers.setdefault("Content-Security-Policy", CSP)

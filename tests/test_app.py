@@ -96,7 +96,7 @@ def test_security_headers(client):
     resp = client.get("/login")
     assert resp.headers["X-Frame-Options"] == "DENY"
     assert resp.headers["X-Content-Type-Options"] == "nosniff"
-    assert resp.headers["Referrer-Policy"] == "no-referrer"
+    assert resp.headers["Referrer-Policy"] == "same-origin"
     assert "frame-ancestors 'none'" in resp.headers["Content-Security-Policy"]
     assert "Strict-Transport-Security" not in resp.headers
     assert "onfocus" not in resp.get_data(as_text=True)
