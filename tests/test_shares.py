@@ -378,3 +378,34 @@ def test_dotted_folder_name_not_split(auth_client, data_root):
     (data_root / "photos.2024").mkdir()
     page = auth_client.get("/browse/").get_data(as_text=True)
     assert '<span class="stem">photos.2024</span><span class="ext"></span>' in page
+
+
+def test_share_details(auth_client, make_share):
+    token = make_share("sub/b.txt", description="for Bob")
+    page = auth_client.get("/shares").get_data(as_text=True)
+    assert f'data-details="/shares/details/{token}"' in page
+    assert ('<span class="share-folder">/sub/</span><span class="share-name">'
+            '<span class="stem">b</span><span class="ext">.txt</span></span>') in page
+
+    dialog = auth_client.get(f"/shares/details/{token}").get_data(as_text=True)
+    assert f"/shares/{token}" in dialog and 'id="share-link"' in dialog and "for Bob" in dialog
+    assert f'hx-target="#share-{token}"' in dialog and "Revoke</button>" in dialog
+
+    auth_client.delete(f"/shares/{token}")
+    dialog = auth_client.get(f"/shares/details/{token}").get_data(as_text=True)
+    assert 'id="share-link"' not in dialog and "Delete</button>" in dialog
+
+
+def test_share_row_root_level_and_root(auth_client, make_share):
+    make_share("")
+    make_share("a.txt")
+    page = auth_client.get("/shares").get_data(as_text=True)
+    assert '<span class="share-folder">/</span><span class="share-name"><span class="stem">a</span>' in page
+    assert ('<span class="share-folder"></span><span class="share-name">'
+            '<span class="stem">/</span><span class="ext"></span>') in page
+
+
+def test_share_details_unknown_or_logged_out(client, auth_client):
+    assert auth_client.get("/shares/details/" + "B" * 32).status_code == 404
+    auth_client.post("/logout")
+    assert client.get("/shares/details/" + "B" * 32).status_code == 302

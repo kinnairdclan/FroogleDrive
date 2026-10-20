@@ -3,8 +3,8 @@
 {% block content %}
 <h1>Shared links</h1>
 <div class="table-wrap">
-<table class="files shares">
-  <thead><tr><th>Path</th><th class="shrink">Created</th><th class="shrink">Expires</th><th class="shrink">Status</th><th>Link</th><th class="shrink"></th></tr></thead>
+<table class="files listing shares">
+  <thead><tr><th>Path</th><th class="shrink hide-mobile">Created</th><th class="shrink">Expires</th><th class="shrink">Status</th><th class="hide-mobile">Link</th><th class="shrink hide-mobile"></th></tr></thead>
   <tbody>
   {% for share in shares %}{% include "partials/_share_row.html" %}
   {% else %}<tr><td colspan="6" class="muted">No links yet. Use “Share” in the file browser.</td></tr>

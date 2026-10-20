@@ -4,13 +4,13 @@ document.addEventListener("htmx:after:swap", (e) => {
   if (dialog?.id === "share-dialog" && !dialog.open) dialog.showModal();
 });
 
-// On phones, tapping a file opens its details dialog instead of downloading it.
+// On phones, tapping a file or share opens its details dialog (instead of downloading).
 const phone = window.matchMedia("(max-width: 600px)");
 document.addEventListener("click", (e) => {
-  const file = e.target.closest("a[data-details]");
-  if (!file || !phone.matches) return;
+  const item = e.target.closest("[data-details]");
+  if (!item || !phone.matches) return;
   e.preventDefault();
-  htmx.ajax("GET", file.dataset.details, { target: "#share-dialog" });
+  htmx.ajax("GET", item.dataset.details, { target: "#share-dialog" });
 });
 
 document.addEventListener("click", async (e) => {

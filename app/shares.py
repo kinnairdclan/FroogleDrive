@@ -153,6 +153,16 @@ def details():
     )
 
 
+@bp.get("/details/<token:token>")
+@login_required
+def share_details(token):
+    """Share info dialog (mobile): its link, dates, status and revoke/delete."""
+    row = get_share(token)
+    if row is None:
+        abort(404)
+    return render_template("partials/_share_details.html", share=share_view(row))
+
+
 @bp.post("")
 @login_required
 def create():

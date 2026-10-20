@@ -1,0 +1,11 @@
+{# Revoke an active link, or delete a revoked one; `target` is the share's table row #}
+{% macro share_actions(share, target, in_dialog=False) -%}
+{% set close = " data-close-dialog" if in_dialog else "" %}
+{% if not share.revoked %}
+<button class="danger" hx-delete="{{ url_for('shares.revoke', token=share.token) }}"{{ close }}
+        hx-target="{{ target }}" hx-swap="outerHTML" hx-confirm="Revoke this link?">Revoke</button>
+{% else %}
+<button class="danger" hx-post="{{ url_for('shares.delete', token=share.token) }}"{{ close }}
+        hx-target="{{ target }}" hx-swap="outerHTML" hx-confirm="Delete this revoked link from the list?">Delete</button>
+{% endif %}
+{%- endmacro %}

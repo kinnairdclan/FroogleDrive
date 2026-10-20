@@ -129,4 +129,11 @@ dialog::backdrop { background: rgb(0 0 0 / .45); }
   .listing td.name a { display: inline-flex; max-width: calc(100% - 24px - .6rem); vertical-align: middle; }
   .listing .stem { overflow: hidden; text-overflow: ellipsis; }
   .listing .ext { flex: none; }
+  /* Shares: icon beside the name, with the folder greyed out on a line below */
+  .shares .share-entry { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: .6rem;
+    align-items: center; cursor: pointer; }
+  .shares .share-entry .icon { grid-row: 1 / 3; margin: 0; }
+  .shares .share-name { grid-area: 1 / 2; display: flex; color: var(--accent-fg); }
+  .shares .share-folder { grid-area: 2 / 2; color: var(--muted); font-size: .8rem;
+    overflow: hidden; text-overflow: ellipsis; }
 }

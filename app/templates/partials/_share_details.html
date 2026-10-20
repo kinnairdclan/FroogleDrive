@@ -1,0 +1,20 @@
+{% from "partials/_share_actions.html" import share_actions %}
+<div class="dialog-body">
+  <h2 class="filename">{{ share.name }}</h2>
+  <p class="path">/{{ share.rel_path }}</p>
+  {% if share.description %}<p class="description">“{{ share.description }}”</p>{% endif %}
+  <p><span class="badge {{ share.status }}">{{ share.status }}</span>
+    <span class="muted">· Created {{ share.created_at|datetime }}
+    · Expires {{ share.expires_at|datetime if share.expires_at else "never" }}</span></p>
+  {% if share.status == "active" %}
+  <div class="copy-row">
+    <input type="text" readonly value="{{ share.url }}" id="share-link">
+    <button class="primary copy-btn" data-copy="#share-link"><span>Copy</span><span>Copied!</span></button>
+  </div>
+  {% endif %}
+  <div class="dialog-actions">
+    {# The row is updated in place and the dialog closes #}
+    {{ share_actions(share, "#share-" ~ share.token, in_dialog=True) }}
+    <button data-close-dialog>Close</button>
+  </div>
+</div>

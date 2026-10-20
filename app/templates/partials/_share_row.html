@@ -1,9 +1,19 @@
+{% from "partials/_name.html" import entry_name %}
+{% from "partials/_share_actions.html" import share_actions %}
 <tr id="share-{{ share.token }}" class="status-{{ share.status }}">
-  <td class="name"><img class="icon" src="{{ file_icon(share.name, share.is_dir) }}" alt="" width="24" height="24">/{{ share.rel_path }}</td>
-  <td>{{ share.created_at|datetime }}</td>
+  {# "/dir/" + name reads as the full path inline; on phones the folder sits under the name #}
+  {% set parts = ("/" ~ share.rel_path).rsplit("/", 1) %}
+  {% set folder, base = (parts[0] ~ "/", parts[1]) if share.rel_path else ("", "/") %}
+  <td class="name">
+    {#- On phones a tap opens the share's details dialog (app.js) -#}
+    <span class="share-entry" title="/{{ share.rel_path }}" data-details="{{ url_for('shares.share_details', token=share.token) }}">
+      {#- -#}<img class="icon" src="{{ file_icon(share.name, share.is_dir) }}" alt="" width="24" height="24">
+      {#- -#}<span class="share-folder">{{ folder }}</span><span class="share-name">{{ entry_name(base, share.is_dir) }}</span>
+    {#- -#}</span></td>
+  <td class="hide-mobile">{{ share.created_at|datetime }}</td>
   <td>{{ share.expires_at|datetime if share.expires_at else "Never" }}</td>
   <td><span class="badge {{ share.status }}">{{ share.status }}</span></td>
-  <td class="link-cell">
+  <td class="link-cell hide-mobile">
     {% if share.status == "active" %}
     <div class="copy-row">
       <input type="text" readonly value="{{ share.url }}" id="link-{{ share.token }}">
@@ -16,13 +26,5 @@
     </div>
     {% endif %}
   </td>
-  <td class="actions">
-    {% if not share.revoked %}
-    <button class="danger" hx-delete="{{ url_for('shares.revoke', token=share.token) }}"
-            hx-target="closest tr" hx-swap="outerHTML" hx-confirm="Revoke this link?">Revoke</button>
-    {% else %}
-    <button class="danger" hx-post="{{ url_for('shares.delete', token=share.token) }}"
-            hx-target="closest tr" hx-swap="outerHTML" hx-confirm="Delete this revoked link from the list?">Delete</button>
-    {% endif %}
-  </td>
+  <td class="actions hide-mobile">{{ share_actions(share, "closest tr") }}</td>
 </tr>
