@@ -55,5 +55,3 @@ python -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
 .venv/bin/pytest
 .venv/bin/coverage run -m pytest && .venv/bin/coverage report   # line + branch, currently 100%
 ```
-
-Note: the failed-login throttle (5 attempts / 5 min per IP) is kept in memory per worker process.
