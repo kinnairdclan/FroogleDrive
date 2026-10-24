@@ -1,0 +1,13 @@
+version: 2
+updates:
+  # requirements.txt and requirements-dev.txt
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # The Dockerfile's python base image
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
