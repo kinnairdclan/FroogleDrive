@@ -215,13 +215,17 @@ def test_view_video_range(app, make_share, data_root):
     assert "Content-Security-Policy" not in resp.headers  # sandbox breaks Chromium's player
 
 
-def test_view_audio_inline(app, make_share, data_root):
-    (data_root / "song.mp3").write_bytes(b"ID3fake")
-    token = make_share("song.mp3")
+@pytest.mark.parametrize("ext, mimetype", [
+    ("mp3", "audio/mpeg"), ("m4a", "audio/mp4"), ("aac", "audio/aac"), ("wav", "audio/wav"),
+    ("ogg", "audio/ogg"), ("opus", "audio/ogg"), ("flac", "audio/flac"),
+])
+def test_view_audio_inline(app, make_share, data_root, ext, mimetype):
+    (data_root / f"song.{ext}").write_bytes(b"fakeaudio")
+    token = make_share(f"song.{ext}")
     anon = app.test_client()
     assert b"View in browser" in anon.get(f"/shares/{token}").data
     resp = anon.get(f"/shares/{token}?view=1")
-    assert resp.mimetype == "audio/mpeg" and "attachment" not in resp.headers.get("Content-Disposition", "")
+    assert resp.mimetype == mimetype and "attachment" not in resp.headers.get("Content-Disposition", "")
 
 
 def test_public_banner(app, auth_client, make_share):
