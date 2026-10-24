@@ -10,10 +10,10 @@
   <button class="primary" hx-get="{{ url_for('shares.new', path=rel) }}" hx-target="#share-dialog">Share this folder</button>
 </div>
 <table class="files listing">
-  <thead><tr><th>Name</th><th class="num hide-mobile">Size</th><th>Modified</th><th class="hide-mobile"></th></tr></thead>
+  <thead><tr><th>Name</th><th class="num hide-mobile">Size</th><th>Modified</th><th class="num hide-mobile">Hits</th><th class="hide-mobile"></th></tr></thead>
   <tbody>
   {% if parent is not none %}
-    <tr><td colspan="4">{{ link(parent, "↩ ..") }}</td></tr>
+    <tr><td colspan="5">{{ link(parent, "↩ ..") }}</td></tr>
   {% endif %}
   {% for e in entries %}
     <tr>
@@ -26,12 +26,13 @@
       </td>
       <td class="num hide-mobile">{{ "" if e.is_dir else e.size|filesize }}</td>
       <td>{{ e.mtime|datetime }}</td>
+      <td class="num hide-mobile">{{ shared[e.rel].hits if e.rel in shared else "N/A" }}</td>
       <td class="actions hide-mobile">
         <button hx-get="{{ url_for('shares.new', path=e.rel) }}" hx-target="#share-dialog">Share</button>
       </td>
     </tr>
   {% else %}
-    <tr><td colspan="4" class="muted">This folder is empty.</td></tr>
+    <tr><td colspan="5" class="muted">This folder is empty.</td></tr>
   {% endfor %}
   </tbody>
 </table>

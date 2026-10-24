@@ -467,3 +467,23 @@ def test_hits_shown(app, auth_client, make_share):
     app.test_client().get(f"/shares/{token}?dl=1")
     assert '<td class="num hide-mobile">1</td>' in auth_client.get("/shares").get_data(as_text=True)
     assert "· 1 hit</span>" in auth_client.get(f"/shares/details/{token}").get_data(as_text=True)
+
+
+def test_hits_in_file_browser(app, auth_client, make_share):
+    file_token, dir_token = make_share("a.txt"), make_share("sub")
+    anon = app.test_client()
+    anon.get(f"/shares/{file_token}?dl=1")
+    anon.get(f"/shares/{dir_token}.zip")
+    anon.get(f"/shares/{dir_token}.zip")
+    page = auth_client.get("/browse/").get_data(as_text=True)
+    hits_by_row = {
+        re.search(r'<span class="stem">([^<]*)</span><span class="ext">([^<]*)', row).group(1, 2):
+        re.search(r'<td class="num hide-mobile">([^<]*)</td>\s*<td class="actions', row).group(1)
+        for row in page.split("<tr>")[2:]  # skip the header row
+    }
+    assert hits_by_row[("sub", "")] == "2" and hits_by_row[("a", ".txt")] == "1"
+    assert hits_by_row[("inner-link", ".txt")] == "N/A"
+
+    assert "Hits: 1</p>" in auth_client.get("/shares/details?path=a.txt").get_data(as_text=True)
+    auth_client.delete(f"/shares/{file_token}")  # revoked links no longer count as shared
+    assert "Hits: N/A</p>" in auth_client.get("/shares/details?path=a.txt").get_data(as_text=True)

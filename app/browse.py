@@ -4,6 +4,7 @@ from flask import Blueprint, current_app, redirect, render_template, request, se
 
 from . import fs
 from .auth import login_required
+from .shares import active_shares
 
 bp = Blueprint("browse", __name__)
 
@@ -31,9 +32,11 @@ def browse(rel):
         return send_file(target, as_attachment=True, conditional=True)
 
     rel = fs.relative(root, target)
+    entries = fs.list_dir(root, target)
     context = {
         "rel": rel,
-        "entries": fs.list_dir(root, target),
+        "entries": entries,
+        "shared": active_shares(e["rel"] for e in entries),
         "crumbs": fs.breadcrumbs(rel),
         "parent": os.path.dirname(rel) if rel else None,
     }

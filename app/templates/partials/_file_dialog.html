@@ -1,6 +1,7 @@
 <div class="dialog-body">
   <h2 class="filename">{{ name }}</h2>
-  <p class="muted">{{ size|filesize }} · Modified {{ mtime|datetime }}</p>
+  <p class="muted">{{ size|filesize }} · Modified {{ mtime|datetime }}
+    · Hits: {{ share.hits if share else "N/A" }}</p>
   {% if share %}
   <p>Shared{% if share.expires_at %} until {{ share.expires_at|datetime }}{% endif %}:</p>
   <div class="copy-row">

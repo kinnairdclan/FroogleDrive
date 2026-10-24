@@ -110,6 +110,17 @@ def shares_inside(rel):
     ]
 
 
+def active_shares(rels):
+    """{rel_path: newest active share} for whichever of `rels` are shared."""
+    rels = set(rels)
+    found = {}
+    rows = get_db().execute("SELECT * FROM shares WHERE revoked = 0 ORDER BY created_at DESC")
+    for r in rows:
+        if r["rel_path"] in rels and r["rel_path"] not in found and share_status(r) == "active":
+            found[r["rel_path"]] = r
+    return found
+
+
 def share_form(root, target):
     """Render the "create link" dialog, refusing folders that contain active shares."""
     rel = fs.relative(root, target)
@@ -155,10 +166,8 @@ def details():
     if not os.path.isfile(target):
         abort(404)
     rel = fs.relative(root, target)
-    rows = get_db().execute(
-        "SELECT * FROM shares WHERE rel_path = ? AND revoked = 0 ORDER BY created_at DESC", (rel,)
-    ).fetchall()
-    share = next((share_view(r) for r in rows if share_status(r) == "active"), None)
+    row = active_shares([rel]).get(rel)
+    share = share_view(row) if row else None
     stat = os.stat(target)
     return render_template(
         "partials/_file_dialog.html", rel=rel, name=os.path.basename(target),
