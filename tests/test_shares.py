@@ -129,7 +129,8 @@ def test_description_column_migrated(app):
     init_app(app)
     with app.app_context():
         from app.db import get_db
-        assert "description" in {r["name"] for r in get_db().execute("PRAGMA table_info(shares)")}
+        columns = {r["name"] for r in get_db().execute("PRAGMA table_info(shares)")}
+        assert {"description", "hits"} <= columns
 
 
 def test_manage_page(auth_client, make_share):
@@ -409,3 +410,47 @@ def test_share_details_unknown_or_logged_out(client, auth_client):
     assert auth_client.get("/shares/details/" + "B" * 32).status_code == 404
     auth_client.post("/logout")
     assert client.get("/shares/details/" + "B" * 32).status_code == 302
+
+
+def hits(app, token):
+    with app.app_context():
+        return get_db().execute("SELECT hits FROM shares WHERE token = ?", (token,)).fetchone()["hits"]
+
+
+def test_hits_file_share(app, make_share, media):
+    token = make_share("sub/pic.JPG")
+    anon = app.test_client()
+    anon.get(f"/shares/{token}")  # just the landing page
+    assert hits(app, token) == 0
+    anon.get(f"/shares/{token}?dl=1")
+    anon.get(f"/shares/{token}?view=1")
+    anon.get(f"/shares/{token}?view=1", headers={"Range": "bytes=0-"})  # player's first request
+    assert hits(app, token) == 3
+    anon.get(f"/shares/{token}?view=1", headers={"Range": "bytes=4-"})  # seeking
+    anon.head(f"/shares/{token}?dl=1")
+    assert hits(app, token) == 3
+
+
+def test_hits_folder_share(app, make_share, media):
+    token = make_share("sub")
+    anon = app.test_client()
+    anon.get(f"/shares/{token}")
+    assert hits(app, token) == 0
+    anon.get(f"/shares/{token}/pic.JPG?view=1")
+    anon.get(f"/shares/{token}/b.txt")
+    anon.get(f"/shares/{token}.zip")
+    assert hits(app, token) == 3
+
+
+def test_hits_inactive_not_counted(app, auth_client, make_share):
+    token = make_share("a.txt")
+    auth_client.delete(f"/shares/{token}")
+    assert app.test_client().get(f"/shares/{token}?dl=1").status_code == 404
+    assert hits(app, token) == 0
+
+
+def test_hits_shown(app, auth_client, make_share):
+    token = make_share("a.txt")
+    app.test_client().get(f"/shares/{token}?dl=1")
+    assert '<td class="num hide-mobile">1</td>' in auth_client.get("/shares").get_data(as_text=True)
+    assert "· 1 hit</span>" in auth_client.get(f"/shares/details/{token}").get_data(as_text=True)

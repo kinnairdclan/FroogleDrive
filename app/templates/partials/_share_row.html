@@ -13,6 +13,7 @@
   <td class="hide-mobile">{{ share.created_at|datetime }}</td>
   <td>{{ share.expires_at|datetime if share.expires_at else "Never" }}</td>
   <td><span class="badge {{ share.status }}">{{ share.status }}</span></td>
+  <td class="num hide-mobile">{{ share.hits }}</td>
   <td class="link-cell hide-mobile">
     {% if share.status == "active" %}
     <div class="copy-row">

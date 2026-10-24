@@ -5,7 +5,8 @@
   {% if share.description %}<p class="description">“{{ share.description }}”</p>{% endif %}
   <p><span class="badge {{ share.status }}">{{ share.status }}</span>
     <span class="muted">· Created {{ share.created_at|datetime }}
-    · Expires {{ share.expires_at|datetime if share.expires_at else "never" }}</span></p>
+    · Expires {{ share.expires_at|datetime if share.expires_at else "never" }}
+    · {{ share.hits }} hit{{ "" if share.hits == 1 else "s" }}</span></p>
   {% if share.status == "active" %}
   <div class="copy-row">
     <input type="text" readonly value="{{ share.url }}" id="share-link">

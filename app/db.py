@@ -10,9 +10,15 @@ CREATE TABLE IF NOT EXISTS shares (
     created_at TEXT NOT NULL,
     expires_at TEXT,
     revoked    INTEGER NOT NULL DEFAULT 0,
-    description TEXT
+    description TEXT,
+    hits       INTEGER NOT NULL DEFAULT 0
 );
 """
+
+MIGRATIONS = [
+    ("description", "TEXT"),
+    ("hits", "INTEGER NOT NULL DEFAULT 0"),
+]
 
 
 def get_db():
@@ -33,8 +39,9 @@ def init_app(app):
     with app.app_context():
         db = get_db()
         db.executescript(SCHEMA)
-        # Databases created before descriptions existed lack the column
+        # Databases created before these columns existed lack them
         columns = {row["name"] for row in db.execute("PRAGMA table_info(shares)")}
-        if "description" not in columns:
-            db.execute("ALTER TABLE shares ADD COLUMN description TEXT")
-            db.commit()
+        for name, decl in MIGRATIONS:
+            if name not in columns:
+                db.execute(f"ALTER TABLE shares ADD COLUMN {name} {decl}")
+        db.commit()

@@ -75,6 +75,17 @@ def viewable(name):
     return viewable_type(name) is not None
 
 
+def record_hit(token):
+    """Count a download or view. Follow-up range requests (video seeking, resumed
+    downloads) and HEAD probes belong to a hit already counted, so they're skipped."""
+    rng = request.headers.get("Range", "").replace(" ", "")
+    if request.method == "HEAD" or (rng and not rng.startswith("bytes=0-")):
+        return
+    db = get_db()
+    db.execute("UPDATE shares SET hits = hits + 1 WHERE token = ?", (token,))
+    db.commit()
+
+
 def send_shared_file(path):
     """Download `path`, or let the browser display it when ?view=1 and the type allows."""
     mimetype = viewable_type(path) if request.args.get("view") else None
@@ -244,6 +255,7 @@ def public(token, sub):
         if sub:
             abort(404)
         if request.args.get("dl") or request.args.get("view"):
+            record_hit(token)
             return send_shared_file(share_root)
         return render_template(
             "public_share.html", public=True, token=token, name=name, is_dir=False,
@@ -257,6 +269,7 @@ def public(token, sub):
     if fs.is_hidden(sub) or fs.is_hidden(fs.relative(share_root, target)):
         abort(404)
     if os.path.isfile(target):
+        record_hit(token)
         return send_shared_file(target)
     rel = fs.relative(share_root, target)
     return render_template(
@@ -272,6 +285,7 @@ def public_zip(token):
     row, share_root = _active_share(token)
     if not row["is_dir"]:
         abort(404)
+    record_hit(token)
     zs = ZipStream(sized=True)
     for path, arcname in fs.walk_files(share_root, hide_dotfiles=True):
         zs.add_path(path, arcname)
