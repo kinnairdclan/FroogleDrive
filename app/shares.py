@@ -20,6 +20,7 @@ VIEWABLE_TYPES = {
     "jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png", "gif": "image/gif",
     "webp": "image/webp", "avif": "image/avif", "bmp": "image/bmp",
     "mp4": "video/mp4", "m4v": "video/mp4", "webm": "video/webm", "ogv": "video/ogg",
+    "mp3": "audio/mpeg",
     "pdf": "application/pdf",
 }
 
