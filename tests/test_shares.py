@@ -345,9 +345,13 @@ def test_dotfiles_hidden_in_folder_share(app, make_share, dotfiles):
     assert sorted(zf.namelist()) == ["b.txt", "deep/c.txt"]
 
 
-def test_dotfiles_still_visible_to_owner(auth_client, dotfiles):
+def test_dotfiles_hidden_from_owner_listing(auth_client, dotfiles):
     page = auth_client.get("/browse/sub").get_data(as_text=True)
-    assert ".env" in page and ".stversions" in page
+    for name in [".env", ".stversions", "env-link", "versions-link"]:
+        assert name not in page
+    assert "b.txt" in page
+    # Still reachable by direct URL.
+    assert auth_client.get("/browse/sub/.env").status_code == 200
 
 
 def test_file_details(auth_client, make_share):

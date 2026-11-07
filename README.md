@@ -39,6 +39,8 @@ Change the bind mount in `docker-compose.yml` to point at your own directory.
   Revoked, expired, unknown, and deleted-target links all return a plain 404.
 - Dotfiles and dot-folders (`.stversions`, `.git`, `.env`, ...) inside a shared
   folder are hidden: not listed, not downloadable, and left out of the zip.
+  They're also left out of your own file browser listing, though you can
+  still reach them by typing the URL.
 
 ## Third-party assets
 

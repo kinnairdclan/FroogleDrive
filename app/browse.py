@@ -32,7 +32,7 @@ def browse(rel):
         return send_file(target, as_attachment=True, conditional=True)
 
     rel = fs.relative(root, target)
-    entries = fs.list_dir(root, target)
+    entries = fs.list_dir(root, target, hide_dotfiles=True)
     context = {
         "rel": rel,
         "entries": entries,
